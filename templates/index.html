@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oaagency</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='images/background.jpg') }}");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 10px;
+            border: 2px solid #F7F7F7;
+        }
+        .container img {
+            max-width: 40px;
+            width: 100%;
+            border-radius: 5px;
+            vertical-align: middle;
+        }
+        .container img.right {
+            float: right;
+            margin-left: 20px;
+            margin-right: 0;
+        }
+        .container img.left {
+            float: left;
+            margin-right: 20px;
+            margin-left: 0;
+        }
+
+        /* Separate chat boxes */
+        .user-message {
+            background-color: #F7F7F7;
+            margin-bottom: -20px;
+        }
+
+        .bot-message {
+            background-color: #F7F7F7;
+        }
+
+        .chat-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .form-control:focus {
+            box-shadow: none;
+        }
+        .spinner {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .chat-form-input {
+        width: 70%;
+        background-color: #F7F7F7;
+        }
+        .form-input::placeholder {
+        font-size: 15px; /* Adjust the font size as per your preference */
+        color: #999; /* Adjust the color as per your preference */
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem; /* Adjust the margin as needed */
+    }
+
+    /* Style the left image */
+    .header-img-left {
+        max-width: 250px;
+        margin-right: auto;
+    }
+
+    /* Style the right image */
+    .header-img-right {
+        max-width: 40px;
+        margin-left: auto;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='images/header.png') }}" style="max-width: 250px;">
+            </div>
+            <div class="header-right">
+                <img src="{{ url_for('static', filename='images/cross.png') }}" style="max-width: 40px;">
+            </div>
+        </div>
+        
+
+        <div class="chat-container" id="chat-container">
+            <!-- <div class="container darker">
+                <img src="https://lh3.googleusercontent.com/ogw/AOLn63HV7k-HxFe7EcmeIrGztOEhIDy8JNdHZ-pKxg6y=s64-c-mo" alt="Avatar" class="right">
+                <p>Hello, how are you?</p>
+            </div>
+            <div class="container">
+                <img src="https://lh3.googleusercontent.com/ogw/AOLn63HV7k-HxFe7EcmeIrGztOEhIDy8JNdHZ-pKxg6y=s64-c-mo" alt="Avatar" class="left">
+                <p>I'm doing well, thanks!</p>
+            </div> -->
+        </div>
+        <form id="chat-form">
+            <div class="spinner">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+    <div class="input-group mt-3" id="chat-form-input">
+        <input type="text" class="form-control form-input" id="soru-input" placeholder="Sorunuzu yazın" style="height: 51px; background-color: #F7F7F7;">
+        <button type="submit" class="btn btn-danger">Gönder</button>
+    </div>
+    
+</form>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const soruInput = document.getElementById('soru-input');
+        const spinner = document.querySelector('.spinner');
+
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const soru = soruInput.value;
+            if (soru.trim() !== '') {
+                appendUserMessage(soru);
+                showSpinner();
+                getBotResponse(soru);
+            }
+            soruInput.value = '';
+        });
+
+        function appendUserMessage(soru) {
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('container', 'user-message');
+            userMessageDiv.innerHTML = `
+                <img src="{{ url_for('static', filename='images/hostes.jpeg') }}" class="right">
+                <p>${soru}</p>
+            `;
+            chatContainer.appendChild(userMessageDiv);
+        }
+
+        function appendBotMessage(cevap) {
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.classList.add('container', 'bot-message');
+            botMessageDiv.innerHTML = `
+                <img src="{{ url_for('static', filename='images/thy.png') }}" class="left">
+                <p>${cevap}</p>
+            `;
+            chatContainer.appendChild(botMessageDiv);
+            hideSpinner();
+            scrollToBottom();
+        }
+
+        function showSpinner() {
+            spinner.style.display = 'block';
+        }
+
+        function hideSpinner() {
+            spinner.style.display = 'none';
+        }
+
+        function getBotResponse(soru) {
+            axios.post('/', { soru })
+                .then(function(response) {
+                    const cevap = response.data.cevap;
+                    appendBotMessage(cevap);
+                })
+                .catch(function(error) {
+                    console.log(error);
+                    hideSpinner();
+                });
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
